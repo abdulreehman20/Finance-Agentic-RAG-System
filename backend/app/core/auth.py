@@ -1,3 +1,5 @@
+import uuid
+
 from sqlmodel import select
 from fastapi import Depends, HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -23,7 +25,16 @@ async def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    result = await session.exec(select(User).where(User.id == payload["sub"]))
+    try:
+        user_id = uuid.UUID(str(payload["sub"]))
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    result = await session.exec(select(User).where(User.id == user_id))
     user = result.first()
     if not user or not user.is_active:
         raise HTTPException(status_code=401, detail="User not found or inactive")

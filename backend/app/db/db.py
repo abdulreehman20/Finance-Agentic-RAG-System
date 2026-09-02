@@ -16,7 +16,16 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from app.core.config import get_settings
 
 # Ensure models are registered on SQLModel.metadata before create_all.
-from app.db.models import User, UserSession  # noqa: F401
+from app.db.models import (  # noqa: F401
+    ChatMessage,
+    ChatThread,
+    DocumentChunk,
+    DocumentTable,
+    MessageCitation,
+    SourceDocument,
+    User,
+    UserSession,
+)
 
 # Query params accepted by libpq/psycopg but rejected by asyncpg's connect().
 _ASYNCPG_UNSUPPORTED_PARAMS = frozenset(

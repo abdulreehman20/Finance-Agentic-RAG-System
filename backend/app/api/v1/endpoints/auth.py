@@ -44,7 +44,7 @@ async def signup(body: SignUpRequest, session: AsyncSession = Depends(get_sessio
     session.add(user)
     await session.flush()
 
-    access_token = create_access_token(sub=user.id, email=user.email)
+    access_token = create_access_token(sub=str(user.id), email=user.email)
     refresh_token = create_refresh_token()
 
     db_session = UserSession(
@@ -58,7 +58,7 @@ async def signup(body: SignUpRequest, session: AsyncSession = Depends(get_sessio
     await session.refresh(user)
 
     return AuthResponse(
-        user_id=user.id,
+        user_id=str(user.id),
         email=user.email,
         full_name=user.full_name or "",
         access_token=access_token,
@@ -75,7 +75,7 @@ async def login(body: SignInRequest, session: AsyncSession = Depends(get_session
     if not user.is_active:
         raise HTTPException(status_code=403, detail="Account is disabled")
 
-    access_token = create_access_token(sub=user.id, email=user.email)
+    access_token = create_access_token(sub=str(user.id), email=user.email)
     refresh_token = create_refresh_token()
 
     db_session = UserSession(
@@ -88,7 +88,7 @@ async def login(body: SignInRequest, session: AsyncSession = Depends(get_session
     await session.commit()
 
     return AuthResponse(
-        user_id=user.id,
+        user_id=str(user.id),
         email=user.email,
         full_name=user.full_name or "",
         access_token=access_token,
@@ -99,7 +99,7 @@ async def login(body: SignInRequest, session: AsyncSession = Depends(get_session
 @router.get("/me", response_model=UserProfile)
 async def me(current_user: User = Depends(get_current_user)):
     return UserProfile(
-        user_id=current_user.id,
+        user_id=str(current_user.id),
         email=current_user.email,
         full_name=current_user.full_name or "",
         role=current_user.role,
@@ -153,9 +153,9 @@ async def refresh_token(
     if not user or not user.is_active:
         raise HTTPException(status_code=401, detail="User not found or inactive")
 
-    access_token = create_access_token(sub=user.id, email=user.email)
+    access_token = create_access_token(sub=str(user.id), email=user.email)
     return AuthResponse(
-        user_id=user.id,
+        user_id=str(user.id),
         email=user.email,
         full_name=user.full_name or "",
         access_token=access_token,
